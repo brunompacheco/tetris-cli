@@ -14,9 +14,12 @@ from asciimatics.screen import ManagedScreen, Screen
 
 
 def draw_well(matrix: np.ndarray, bg_square: str = " .") -> str:
-    matrix = np.where(matrix == 0, bg_square, 2 * chr(0x2588))
+    solid_block = chr(0x2588)
+    matrix = np.where(matrix == 0, bg_square, 2 * solid_block)
 
-    lines = [''.join(line) for line in matrix]
+    lines = [2*solid_block + ''.join(line) + 2*solid_block for line in matrix]
+    lines.insert(0, solid_block * len(lines[0]))
+    lines.append(solid_block * len(lines[0]))
     board = '\n'.join(lines)
 
     return board
