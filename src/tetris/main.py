@@ -1,12 +1,13 @@
+from abc import ABC, abstractmethod
 import sys
-from threading import Timer
+from threading import Thread, Timer
 from time import sleep
 
 import click
 import numpy as np
 
 from . import __version__
-from tetris.blocks import TetrominoI
+from tetris.blocks import Tetromino, TetrominoI
 from tetris.well import Well
 
 from asciimatics.event import KeyboardEvent
@@ -14,27 +15,6 @@ from asciimatics.exceptions import ResizeScreenError, StopApplication
 from asciimatics.paths import DynamicPath
 from asciimatics.screen import ManagedScreen, Screen
 
-
-class KeyboardController(DynamicPath):
-    def process_event(self, event):
-        if isinstance(event, KeyboardEvent):
-            key = event.key_code
-            if key == Screen.KEY_UP:
-                self._y -= 1
-                self._y = max(self._y, 2)
-            elif key == Screen.KEY_DOWN:
-                self._y += 1
-                self._y = min(self._y, self._screen.height-2)
-            elif key == Screen.KEY_LEFT:
-                self._x -= 2
-                self._x = max(self._x, 3)
-            elif key == Screen.KEY_RIGHT:
-                self._x += 2
-                self._x = min(self._x, self._screen.width-3)
-            else:
-                return event
-        else:
-            return event
 
 def draw_well(matrix: np.ndarray, bg_square: str = " .") -> str:
     matrix = np.where(matrix == 0, bg_square, 2 * chr(0x2588))
@@ -60,11 +40,10 @@ def update_screen(screen, well, tetromino):
 
     screen.refresh()
 
-class TetrominoDropper():
-    def __init__(self) -> None:
+class RecurringTimer(ABC):
+    def __init__(self, interval: float) -> None:
         self.timer = None
-
-        self._stop = False
+        self.interval = interval
 
     @property
     def is_alive(self):
@@ -73,17 +52,59 @@ class TetrominoDropper():
         else:
             return self.timer.is_alive()
 
-    def run(self, interval: float, tetromino, well):
-        self.timer = Timer(interval, self.run, (interval, tetromino, well))
+    def start(self, *args, **kwargs):
+        self.timer = Timer(self.interval, self._run, args=args, kwargs=kwargs)
         self.timer.daemon = True
         self.timer.start()
 
+    def cancel(self):
+        self.timer.cancel()
+
+    def _run(self, *args, **kwargs):
+        self.timer = Timer(self.interval, self._run, args=args, kwargs=kwargs)
+        self.timer.daemon = True
+        self.timer.start()
+
+        self.run(*args, **kwargs)
+    
+    @abstractmethod
+    def run(self):
+        pass
+
+class TetrominoDropper(RecurringTimer):
+    def run(self, tetromino, well):
         tetromino.y += 1
 
-        if well.check_collision(tetromino) or well.check_oob(tetromino):
+        if well.check_overlap(tetromino) or well.check_oob(tetromino):
             tetromino.y -= 1
-            self.timer.cancel()
         # maybe raise event on collision?
+
+class TetrominoController(RecurringTimer):
+    def run(self, screen: Screen, tetromino: Tetromino, well: Well):
+        screen.wait_for_input(self.interval)
+
+        event = screen.get_event()
+        if isinstance(event, KeyboardEvent):
+            key = event.key_code
+            if key == Screen.KEY_DOWN:
+                screen.print_at("D",0,0)
+                tetromino.y += 1
+
+                if well.check_overlap(tetromino) or well.check_oob(tetromino):
+                    tetromino.y -= 1
+            elif key == Screen.KEY_LEFT:
+                screen.print_at("L",0,0)
+                tetromino.x -= 1
+
+                if well.check_overlap(tetromino) or well.check_oob(tetromino):
+                    tetromino.x += 1
+            elif key == Screen.KEY_RIGHT:
+                screen.print_at("R",0,0)
+                tetromino.x += 1
+
+                if well.check_overlap(tetromino) or well.check_oob(tetromino):
+                    tetromino.x -= 1
+        
 
 @ManagedScreen
 def play(screen: Screen = None):
@@ -92,20 +113,19 @@ def play(screen: Screen = None):
     ## MAIN LOOP
 
     # 1. generate new tetromino
-    t_I = TetrominoI(well)
+    t = TetrominoI(well)
 
     # 2. drop tetromino until it touches the others
     # well.matrix[5,5] = 1
 
-    dropper = TetrominoDropper()
-    dropper.run(0.25, t_I, well)
+    dropper = TetrominoDropper(0.25)
+    controller = TetrominoController(0.01)
+
+    controller.start(screen, t, well)
+    dropper.start(t, well)
 
     while True:
-        ev = screen.get_key()
-        if ev in (ord('Q'), ord('q')):
-            return
-
-        update_screen(screen, well, t_I)
+        update_screen(screen, well, t)
 
     # 3. add tetromino to well
 
