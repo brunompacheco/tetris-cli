@@ -1,4 +1,6 @@
+from multiprocessing import Event
 import sys
+from threading import Thread
 
 import click
 import numpy as np
@@ -6,14 +8,14 @@ import numpy as np
 from tetris.movement import TetrominoController, TetrominoDropper
 
 from . import __version__
-from tetris.blocks import TetrominoI
+from tetris.blocks import Tetromino, TetrominoI
 from tetris.well import Well
 
 from asciimatics.exceptions import ResizeScreenError
 from asciimatics.screen import ManagedScreen, Screen
 
 
-def draw_well(matrix: np.ndarray, bg_square: str = " .") -> str:
+def draw_well(matrix: np.ndarray, bg_square: str = "  ") -> str:
     solid_block = chr(0x2588)
     matrix = np.where(matrix == 0, bg_square, 2 * solid_block)
 
@@ -24,25 +26,62 @@ def draw_well(matrix: np.ndarray, bg_square: str = " .") -> str:
 
     return board
 
-def update_screen(screen, well, tetromino):
-    # TODO: draw only changes, avoid flickering
+class WellDrawer():
+    """Update on-demand.
+    """
+    def __init__(self, flag: Event) -> None:
+        self.thread = None
+        self.flag = flag
 
-    x = (screen.width // 2) - (well.ncols // 2)
-    y = (screen.height // 2) - (well.nrows // 2)
+        self._past_well_str = None
 
-    well_str = draw_well(well.add_tetromino(tetromino))
-    for l, line in enumerate(well_str.split('\n')):
-        screen.print_at(
-            line,
-            x=x,
-            y=y+l
-        )
+    def start(self, *args, **kwargs):
+        self.thread = Thread(target=self.run, args=args, kwargs=kwargs)
+        self.thread.daemon = True
+        self.thread.start()
 
-    screen.refresh()
+    def run(self, screen: Screen, well: Well, tetromino: Tetromino):
+        self.flag.wait()
+        self.flag.clear()
+
+        # TODO: draw only changes, avoid flickering
+
+        x = (screen.width // 2) - (well.ncols // 2)
+        y = (screen.height // 2) - (well.nrows // 2)
+
+        well_str = draw_well(well.add_tetromino(tetromino))
+        for l, line in enumerate(well_str.split('\n')):
+            if self._past_well_str is not None:
+                past_line = self._past_well_str.split('\n')[l]
+                if (past_line == line).all():
+                    continue
+
+            screen.print_at(
+                line,
+                x=x,
+                y=y+l
+            )
+
+        screen.refresh()
+
+        self.thread = Thread(target=self.run, args=(screen, well, tetromino))
+        self.thread.daemon = True
+        self.thread.start()
 
 @ManagedScreen
 def play(screen: Screen = None):
     well = Well()
+
+    game_on = Event()
+    game_on.set()
+
+    update_flag = Event()
+    update_flag.set()
+
+    t_dropped = Event()
+    t_dropped.clear()
+
+    well_drawer = WellDrawer(update_flag)
 
     ## MAIN LOOP
 
@@ -52,14 +91,19 @@ def play(screen: Screen = None):
     # 2. drop tetromino until it touches the others
     # well.matrix[5,5] = 1
 
-    dropper = TetrominoDropper(0.25)
-    controller = TetrominoController(0.01)
+    dropper = TetrominoDropper(0.25, update_flag)
+    controller = TetrominoController(0.01, update_flag)
+
+    well_drawer.start(screen, well, t)
 
     controller.start(screen, t, well)
     dropper.start(t, well)
 
     while True:
-        update_screen(screen, well, t)
+        try:
+            pass
+        except KeyboardInterrupt:
+            return
 
     # 3. add tetromino to well
 

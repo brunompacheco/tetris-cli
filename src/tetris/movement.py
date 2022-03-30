@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from threading import Timer
+from threading import Event, Timer
 
 from asciimatics.event import KeyboardEvent
 from asciimatics.screen import Screen
@@ -40,36 +40,42 @@ class RecurringTimer(ABC):
         pass
 
 class TetrominoDropper(RecurringTimer):
+    def __init__(self, interval: float, update_flag: Event) -> None:
+        super().__init__(interval)
+
+        self.update_flag = update_flag
+
     def run(self, tetromino: Tetromino, well: Well):
         tetromino.y += 1
 
         if well.check_overlap(tetromino) or well.check_oob(tetromino):
             tetromino.y -= 1
-        # maybe raise event on collision?
+            # TODO: raise event on collision
+        else:
+            self.update_flag.set()
 
 class TetrominoController(RecurringTimer):
+    def __init__(self, interval: float, update_flag: Event) -> None:
+        super().__init__(interval)
+
+        self.update_flag = update_flag
+
     def run(self, screen: Screen, tetromino: Tetromino, well: Well):
         screen.wait_for_input(self.interval)
 
+        old_x, old_y = tetromino.x, tetromino.y
         event = screen.get_event()
         if isinstance(event, KeyboardEvent):
             key = event.key_code
             if key == Screen.KEY_DOWN:
-                screen.print_at("D",0,0)
                 tetromino.y += 1
-
-                if well.check_overlap(tetromino) or well.check_oob(tetromino):
-                    tetromino.y -= 1
             elif key == Screen.KEY_LEFT:
-                screen.print_at("L",0,0)
                 tetromino.x -= 1
-
-                if well.check_overlap(tetromino) or well.check_oob(tetromino):
-                    tetromino.x += 1
             elif key == Screen.KEY_RIGHT:
-                screen.print_at("R",0,0)
                 tetromino.x += 1
 
-                if well.check_overlap(tetromino) or well.check_oob(tetromino):
-                    tetromino.x -= 1
+        if well.check_overlap(tetromino) or well.check_oob(tetromino):
+            tetromino.x, tetromino.y = old_x, old_y
+        else:
+            self.update_flag.set()
         
