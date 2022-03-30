@@ -6,8 +6,13 @@ authors = ["Bruno M. Pacheco <mpacheco.bruno@gmail.com>"]
 readme = "README.md"
 keywords = ["tetris"]
 
+[tool.poetry.scripts]
+tetris-debug = "tetris.main:main"
+
 [tool.poetry.dependencies]
 python = "^3.8"
+asciimatics = "^1.13.0"
+click = "^8.1.0"
 
 [tool.poetry.dev-dependencies]
 
