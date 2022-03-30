@@ -2,6 +2,7 @@ import sys
 from time import sleep
 
 import click
+from tetris.blocks import TetrominoI
 
 from tetris.well import Well
 
@@ -38,21 +39,17 @@ class KeyboardController(DynamicPath):
             return event
 
 @ManagedScreen
-def demo(screen: Screen = None):
+def play(screen: Screen = None):
     well = Well()
 
-    i = 0
+    t_I = TetrominoI(well)
+    t_I.y = 5
+    well.add_tetromino(t_I)
+
     while True:
         ev = screen.get_key()
         if ev in (ord('Q'), ord('q')):
             return
-
-        if i < min(well.nrows, well.ncols):
-            well.matrix[i,i] = 1
-            i += 1
-        if i >= min(well.nrows, well.ncols):
-            well.matrix[i-10,i-10] = 0
-            i += 1
 
         sleep(1)
         # screen.clear()
@@ -72,7 +69,7 @@ def main():
     """Tetris remake using asciimatics.
     """
     try:
-        demo()
+        play()
         sys.exit(0)
     except ResizeScreenError:
         pass

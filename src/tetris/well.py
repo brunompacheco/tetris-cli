@@ -10,6 +10,13 @@ class Well():
 
         self.matrix = np.zeros((nrows, ncols))
 
+    def add_tetromino(self, tetromino):
+        t_matrix = tetromino.matrix
+
+        x = tetromino.x
+        y = tetromino.y
+        self.matrix[y:y + t_matrix.shape[0], x:x+t_matrix.shape[1]] += t_matrix
+
     def __str__(self) -> str:
         matrix = np.where(self.matrix == 0, self.bg_square, 2 * chr(0x2588))
 
