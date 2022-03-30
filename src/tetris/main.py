@@ -80,7 +80,7 @@ class TetrominoDropper():
 
         tetromino.y += 1
 
-        if well.check_collision(tetromino):
+        if well.check_collision(tetromino) or well.check_oob(tetromino):
             tetromino.y -= 1
             self.timer.cancel()
         # maybe raise event on collision?
@@ -95,10 +95,10 @@ def play(screen: Screen = None):
     t_I = TetrominoI(well)
 
     # 2. drop tetromino until it touches the others
-    well.matrix[5,5] = 1
+    # well.matrix[5,5] = 1
 
     dropper = TetrominoDropper()
-    dropper.run(1, t_I, well)
+    dropper.run(0.25, t_I, well)
 
     while True:
         ev = screen.get_key()

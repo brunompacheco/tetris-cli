@@ -26,7 +26,7 @@ class Well():
     def check_collision(self, tetromino) -> bool:
         well_region = self.matrix[
             tetromino.y:tetromino.y + tetromino.matrix.shape[0],
-            tetromino.x:tetromino.x+tetromino.matrix.shape[1]
+            tetromino.x:tetromino.x + tetromino.matrix.shape[1]
         ]
 
         well_region = well_region > 0
@@ -36,3 +36,16 @@ class Well():
 
         return intersection > 0
 
+    def check_oob(self, tetromino) -> bool:
+        """Check if tetromino is out of bounds.
+        """
+        if tetromino.x < 0:
+            return True
+        elif tetromino.y < 0:
+            return True
+        elif tetromino.x + tetromino.matrix.shape[1] > self.ncols:
+            return True
+        elif tetromino.y + tetromino.matrix.shape[0] > self.nrows:
+            return True
+        else:
+            return False
