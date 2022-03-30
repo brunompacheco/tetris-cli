@@ -22,3 +22,17 @@ class Well():
             self.matrix = new_matrix
         else:
             return new_matrix
+    
+    def check_collision(self, tetromino) -> bool:
+        well_region = self.matrix[
+            tetromino.y:tetromino.y + tetromino.matrix.shape[0],
+            tetromino.x:tetromino.x+tetromino.matrix.shape[1]
+        ]
+
+        well_region = well_region > 0
+        tetromino_region = tetromino.matrix > 0
+
+        intersection = (well_region & tetromino_region).sum()
+
+        return intersection > 0
+

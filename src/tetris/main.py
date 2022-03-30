@@ -73,17 +73,16 @@ class TetrominoDropper():
         else:
             return self.timer.is_alive()
 
-    def run(self, interval: float, tetromino):
-        self.timer = Timer(interval, self.run, (interval, tetromino))
+    def run(self, interval: float, tetromino, well):
+        self.timer = Timer(interval, self.run, (interval, tetromino, well))
         self.timer.daemon = True
         self.timer.start()
 
         tetromino.y += 1
 
-        # TODO: check for collision
-        # if collision:  # in the future update
-        #     tetromino.y -= 1
-        #     self.timer.cancel()
+        if well.check_collision(tetromino):
+            tetromino.y -= 1
+            self.timer.cancel()
         # maybe raise event on collision?
 
 @ManagedScreen
@@ -96,8 +95,10 @@ def play(screen: Screen = None):
     t_I = TetrominoI(well)
 
     # 2. drop tetromino until it touches the others
+    well.matrix[5,5] = 1
+
     dropper = TetrominoDropper()
-    dropper.run(1, t_I)
+    dropper.run(1, t_I, well)
 
     while True:
         ev = screen.get_key()
