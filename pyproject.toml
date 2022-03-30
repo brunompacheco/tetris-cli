@@ -13,6 +13,7 @@ tetris-debug = "tetris.main:main"
 python = "^3.8"
 asciimatics = "^1.13.0"
 click = "^8.1.0"
+numpy = "^1.22.3"
 
 [tool.poetry.dev-dependencies]
 

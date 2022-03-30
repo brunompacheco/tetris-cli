@@ -1,6 +1,9 @@
 import sys
+from time import sleep
 
 import click
+
+from tetris.well import Well
 
 from . import __version__
 
@@ -34,51 +37,34 @@ class KeyboardController(DynamicPath):
         else:
             return event
 
-class Tetrimino(Sprite):
-    def __init__(self, screen, **kwargs):
-        box = "####\n"
-        box += "####"
-
-        super().__init__(
-            screen,
-            renderer_dict={
-                "default": StaticRenderer(images=[box]),
-            },
-            path=KeyboardController(screen, 1 + screen.width // 2, screen.height // 2),
-            clear=True,
-            **kwargs
-        )
-
-class Well(Print):
-    def __init__(self, screen, nrows=20, ncols=10) -> None:
-        bg_dot = "  "
-        board = ""
-        board += "${7,2,7}_" * (2 * ncols + 4) + '\n'
-        board += ("${7,2,7}__${7,2,0}" + bg_dot * ncols + '${7,2,7}__\n') * nrows
-        board += "${7,2,7}_" * (2 * ncols + 4) + '\n'
-
-        super().__init__(
-            screen,
-            StaticRenderer(images=[board,]),
-            x=(screen.width // 2) - (ncols // 2),
-            y=(screen.height // 2) - (nrows // 2),
-            speed=0,
-            transparent=True,
-        )
-
 @ManagedScreen
 def demo(screen: Screen = None):
-    effects = [
-        Well(screen),
-        Tetrimino(screen),
-    ]
-    # screen.play([Scene(effects, -1),])
-    screen.set_scenes([Scene(effects, -1),])
+    well = Well()
+
+    i = 0
     while True:
-        try:
-            screen.draw_next_frame()
-        except StopApplication:
-            break
+        ev = screen.get_key()
+        if ev in (ord('Q'), ord('q')):
+            return
+
+        if i < min(well.nrows, well.ncols):
+            well.matrix[i,i] = 1
+            i += 1
+        if i >= min(well.nrows, well.ncols):
+            well.matrix[i-10,i-10] = 0
+            i += 1
+
+        sleep(1)
+        # screen.clear()
+        x = (screen.width // 2) - (well.ncols // 2)
+        y = (screen.height // 2) - (well.nrows // 2)
+        for l, line in enumerate(str(well).split('\n')):
+            screen.print_at(
+                line,
+                x=x,
+                y=y+l
+            )
+        screen.refresh()
 
 @click.command()
 @click.version_option(version=__version__)
