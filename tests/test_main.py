@@ -7,6 +7,7 @@ from tetris import main
 from tetris.blocks import TetrominoO
 from tetris.well import Well
 
+
 @pytest.fixture
 def runner():
     return click.testing.CliRunner()
@@ -29,22 +30,6 @@ def test_main_succeeds(runner, mock_event_flag, mock_screen):
     result = runner.invoke(main.main)
 
     assert result.exit_code == 0
-
-def test_draw_well():
-    matrix = np.array([
-        [0, 1],
-        [2, 0],
-    ])
-    board = main.draw_well(matrix, "  ")
-
-    s = 2 * chr(0x2588)
-    expected = [
-        4 * s,
-        s + "  " + 2 * s,
-        2 * s + "  " + s,
-        4 * s
-    ]
-    assert board == '\n'.join(expected)
 
 def test_drop_tetromino(mock_screen):
     well = Well(5, 5)
