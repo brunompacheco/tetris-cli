@@ -1,6 +1,5 @@
-from multiprocessing import Event
 import sys
-from threading import Thread
+from threading import Thread, Event
 
 import click
 import numpy as np
@@ -8,7 +7,7 @@ import numpy as np
 from tetris.movement import TetrominoController, TetrominoDropper
 
 from . import __version__
-from tetris.blocks import Tetromino, TetrominoI, TetrominoL
+from tetris.blocks import Tetromino, TetrominoI, TetrominoO
 from tetris.well import Well
 
 from asciimatics.exceptions import ResizeScreenError
@@ -68,13 +67,7 @@ class WellDrawer():
         self.thread.daemon = True
         self.thread.start()
 
-@ManagedScreen
-def play(screen: Screen = None):
-    well = Well()
-
-    game_on = Event()
-    game_on.set()
-
+def drop_tetromino(tetromino: Tetromino, well: Well, screen: Screen):
     update_flag = Event()
     update_flag.set()
 
@@ -82,11 +75,7 @@ def play(screen: Screen = None):
     t_dropped.clear()
 
     well_drawer = WellDrawer(update_flag)
-
-    ## MAIN LOOP
-
-    # 1. generate new tetromino
-    t = TetrominoL(well)
+    well_drawer.start(screen, well, tetromino)
 
     # 2. drop tetromino until it touches the others
     # well.matrix[5,5] = 1
@@ -94,22 +83,41 @@ def play(screen: Screen = None):
     dropper = TetrominoDropper(0.25, update_flag, t_dropped)
     controller = TetrominoController(0.01, update_flag)
 
-    well_drawer.start(screen, well, t)
+    controller.start(screen, tetromino, well)
+    dropper.start(tetromino, well)
 
-    controller.start(screen, t, well)
-    dropper.start(t, well)
+    try:
+        t_dropped.wait()
+    except KeyboardInterrupt:
+        return 1
 
-    while not t_dropped.is_set():
-        try:
-            pass
-        except KeyboardInterrupt:
-            return
-
-    return
+    controller.cancel()
+    dropper.cancel()
 
     # 3. add tetromino to well
+    well.add_tetromino(tetromino, in_place=True)
 
     # 4. check for line clears
+
+    return 0
+
+@ManagedScreen
+def play(screen: Screen = None):
+    game_on = Event()
+    game_on.set()
+
+    well = Well()
+
+    while game_on.is_set():
+        ## MAIN LOOP
+
+        # 1. generate new tetromino
+        t = TetrominoO(well)
+
+        if drop_tetromino(t, well, screen) == 1:
+            return 1
+
+    return 0
 
 @click.command()
 @click.version_option(version=__version__)
@@ -118,9 +126,10 @@ def main():
     """
     try:
         play()
-        sys.exit(0)
     except ResizeScreenError:
         pass
+
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

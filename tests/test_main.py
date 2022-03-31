@@ -4,6 +4,8 @@ import pytest
 import numpy as np
 
 from tetris import main
+from tetris.blocks import TetrominoO
+from tetris.well import Well
 
 @pytest.fixture
 def runner():
@@ -43,3 +45,19 @@ def test_draw_well():
         4 * s
     ]
     assert board == '\n'.join(expected)
+
+def test_drop_tetromino(mock_screen):
+    well = Well(5, 5)
+    t = TetrominoO(well)
+    screen = mock_screen.return_value
+
+    main.drop_tetromino(t, well, screen)
+
+    expected = np.array([
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,1,1,0,0],
+        [0,1,1,0,0],
+    ])
+    assert (well.matrix >= expected).all()
