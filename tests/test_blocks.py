@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from tetris.blocks import TetrominoI
+from tetris.blocks import TetrominoI, TetrominoJ, TetrominoL, TetrominoS, TetrominoZ, TetrominoO, TetrominoT
 from tetris.well import Well
 
 @pytest.fixture
@@ -12,16 +12,16 @@ def basic_well():
 def tetromino_I(basic_well):
     return TetrominoI(basic_well)
 
-def test_full_rotation(tetromino_I):
-    # TODO: iterate all tetrominos
+def test_full_rotation(basic_well):
+    for T in [TetrominoI, TetrominoJ, TetrominoL, TetrominoO, TetrominoS, TetrominoZ, TetrominoT]:
+        t = T(basic_well)
 
-    first_matrix = tetromino_I.matrix
-    for _ in range(4):
-        tetromino_I.rotate()
-    rotated_matrix = tetromino_I.matrix
+        first_matrix = t.matrix
+        for _ in range(4):
+            t.rotate()
+        rotated_matrix = t.matrix
 
-    assert first_matrix.shape == rotated_matrix.shape
-    assert (first_matrix == rotated_matrix).all()
+        assert (first_matrix == rotated_matrix).all()
 
 def test_rotation_I(tetromino_I):
     assert (tetromino_I.matrix == np.array([

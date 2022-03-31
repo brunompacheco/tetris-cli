@@ -8,7 +8,7 @@ import numpy as np
 from tetris.movement import TetrominoController, TetrominoDropper
 
 from . import __version__
-from tetris.blocks import Tetromino, TetrominoI
+from tetris.blocks import Tetromino, TetrominoI, TetrominoL
 from tetris.well import Well
 
 from asciimatics.exceptions import ResizeScreenError
@@ -86,7 +86,7 @@ def play(screen: Screen = None):
     ## MAIN LOOP
 
     # 1. generate new tetromino
-    t = TetrominoI(well)
+    t = TetrominoL(well)
 
     # 2. drop tetromino until it touches the others
     # well.matrix[5,5] = 1

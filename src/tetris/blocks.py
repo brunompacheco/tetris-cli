@@ -29,9 +29,67 @@ class TetrominoI(Tetromino):
 
 class TetrominoJ(Tetromino):
     def __init__(self, well: Well) -> None:
-        x = (well.ncols // 2) - 2
+        x = (well.ncols // 2) - 1
+        y = -1
+
+        super().__init__(well, x, y)
+
+        self.matrix = np.zeros((3,3))
+        self.matrix[0,0] = 1
+        self.matrix[1,:] = 1
+
+class TetrominoL(Tetromino):
+    def __init__(self, well: Well) -> None:
+        x = (well.ncols // 2) - 1
+        y = -1
+
+        super().__init__(well, x, y)
+
+        self.matrix = np.zeros((3,3))
+        self.matrix[0,2] = 1
+        self.matrix[1,:] = 1
+
+class TetrominoO(Tetromino):
+    def __init__(self, well: Well) -> None:
+        x = (well.ncols // 2) - 1
+        y = -1
+
+        super().__init__(well, x, y)
+
+        self.matrix = np.ones((2,2))
+
+class TetrominoS(Tetromino):
+    def __init__(self, well: Well) -> None:
+        x = (well.ncols // 2) - 1
+        y = -1
+
+        super().__init__(well, x, y)
+
+        self.matrix = np.ones((3,3))
+        self.matrix[0,0] = 0
+        self.matrix[1,2] = 0
+        self.matrix[2,:] = 0
+
+class TetrominoZ(Tetromino):
+    def __init__(self, well: Well) -> None:
+        x = (well.ncols // 2) - 1
         y = 0
 
         super().__init__(well, x, y)
 
-        self.n_cycles = 2
+        self.matrix = np.ones((3,3))
+        self.matrix[0,2] = 0
+        self.matrix[1,0] = 0
+        self.matrix[2,:] = 0
+
+class TetrominoT(Tetromino):
+    def __init__(self, well: Well) -> None:
+        x = (well.ncols // 2) - 1
+        y = 0
+
+        super().__init__(well, x, y)
+
+        self.matrix = np.ones((3,3))
+        self.matrix[0,0] = 0
+        self.matrix[0,2] = 0
+        self.matrix[2,:] = 0
