@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import numpy as np
 
 from .well import Well
@@ -11,6 +11,11 @@ class Tetromino(ABC):
 
         self._well = well
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        ...
+
     def rotate(self, ccw=False):
         if ccw:
             self.matrix = np.rot90(self.matrix, k=1)
@@ -18,6 +23,7 @@ class Tetromino(ABC):
             self.matrix = np.rot90(self.matrix, k=-1)
 
 class TetrominoI(Tetromino):
+    name = 'I'
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 2
         y = 1
@@ -28,6 +34,7 @@ class TetrominoI(Tetromino):
         self.matrix[1,:] = 1
 
 class TetrominoJ(Tetromino):
+    name = 'J'
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
         y = 0
@@ -39,6 +46,7 @@ class TetrominoJ(Tetromino):
         self.matrix[1,:] = 1
 
 class TetrominoL(Tetromino):
+    name = 'L'
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
         y = 0
@@ -50,6 +58,7 @@ class TetrominoL(Tetromino):
         self.matrix[1,:] = 1
 
 class TetrominoO(Tetromino):
+    name = 'O'
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
         y = 0
@@ -59,6 +68,7 @@ class TetrominoO(Tetromino):
         self.matrix = np.ones((2,2))
 
 class TetrominoS(Tetromino):
+    name = 'S'
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
         y = 0
@@ -71,6 +81,7 @@ class TetrominoS(Tetromino):
         self.matrix[2,:] = 0
 
 class TetrominoZ(Tetromino):
+    name = 'Z'
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
         y = 0
@@ -83,6 +94,7 @@ class TetrominoZ(Tetromino):
         self.matrix[2,:] = 0
 
 class TetrominoT(Tetromino):
+    name = 'T'
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
         y = 0
