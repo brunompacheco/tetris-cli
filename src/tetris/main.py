@@ -97,8 +97,6 @@ def drop_tetromino(tetromino: Tetromino, well: Well, screen: Screen):
     # 3. add tetromino to well
     well.add_tetromino(tetromino, in_place=True)
 
-    # 4. check for line clears
-
     return 0
 
 @ManagedScreen
@@ -108,6 +106,8 @@ def play(screen: Screen = None):
 
     well = Well()
 
+    lines_cleared = 0
+    screen.print_at(lines_cleared, 0, 0)
     while game_on.is_set():
         ## MAIN LOOP
 
@@ -115,10 +115,16 @@ def play(screen: Screen = None):
         t = get_tetromino(
             np.random.choice(['I', 'O', 'L', 'J', 'S', 'Z', 'T']),
             well
-        )
+       )
 
         if drop_tetromino(t, well, screen) == 1:
             return 1
+
+        # 4. check for line clears
+        lines_cleared += well.clear_lines()
+        screen.print_at(lines_cleared, 0, 0)
+
+        # 5. check for game overs
 
     return 0
 

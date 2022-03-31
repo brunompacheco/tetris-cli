@@ -69,3 +69,25 @@ def test_trim_tetrominos(basic_well):
         [1,1],
         [0,0],
     ])).all()
+
+def test_clear_lines():
+    well = Well(5, 5)
+
+    starting_mat = np.eye(5)
+    well.matrix = starting_mat
+
+    assert well.clear_lines() == 0
+    assert (well.matrix == starting_mat).all()
+
+    well.matrix[2,:] = 1
+    well.matrix[3,:] = 1
+
+    expected = np.array([
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [1,0,0,0,0],
+        [0,1,0,0,0],
+        [0,0,0,0,1],
+    ])
+    assert well.clear_lines() == 2
+    assert (well.matrix == expected).all()

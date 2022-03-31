@@ -70,3 +70,15 @@ class Well():
             return True
         else:
             return False
+    
+    def clear_lines(self):
+        occupied = self.matrix > 0
+
+        lines_cleared = occupied.all(axis=1)
+
+        new_matrix = np.zeros((self.nrows, self.ncols))
+        new_matrix[sum(lines_cleared):] = self.matrix[~lines_cleared]
+
+        self.matrix = new_matrix
+
+        return sum(lines_cleared)
