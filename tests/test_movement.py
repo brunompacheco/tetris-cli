@@ -21,17 +21,18 @@ def dropper():
     return TetrominoDropper(0.05, Event(), Event())
 
 def test_drop_cancel(basic_well, tetromino, dropper):
+    y_ = tetromino.y
     dropper.start(tetromino, basic_well)
 
     sleep(6 * dropper.interval)
 
     dropper.cancel()
 
-    assert tetromino.y == 5
+    assert tetromino.y - y_ == 5
 
     sleep(5 * dropper.interval)
 
-    assert tetromino.y == 5
+    assert tetromino.y - y_ == 5
 
 def test_drop_flag(basic_well):
     t = TetrominoI(basic_well)

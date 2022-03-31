@@ -111,8 +111,6 @@ def play(screen: Screen = None):
 
     # 4. check for line clears
 
-
-
 @click.command()
 @click.version_option(version=__version__)
 def main():
