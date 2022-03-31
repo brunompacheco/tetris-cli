@@ -65,7 +65,7 @@ class TetrominoController(RecurringTimer):
     def run(self, screen: Screen, tetromino: Tetromino, well: Well):
         screen.wait_for_input(self.interval)
 
-        old_x, old_y = tetromino.x, tetromino.y
+        old_x, old_y, old_matrix = tetromino.x, tetromino.y, tetromino.matrix
         event = screen.get_event()
         if isinstance(event, KeyboardEvent):
             key = event.key_code
@@ -75,9 +75,13 @@ class TetrominoController(RecurringTimer):
                 tetromino.x -= 1
             elif key == Screen.KEY_RIGHT:
                 tetromino.x += 1
+            elif key in [ord('X'), ord('x')]:
+                tetromino.rotate()
+            elif key in [ord('Z'), ord('z')]:
+                tetromino.rotate(ccw=True)
 
         if well.check_overlap(tetromino) or well.check_oob(tetromino):
-            tetromino.x, tetromino.y = old_x, old_y
+            tetromino.x, tetromino.y, tetromino.matrix = old_x, old_y, old_matrix
         else:
             self.update_flag.set()
         
