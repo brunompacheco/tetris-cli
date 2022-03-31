@@ -7,7 +7,7 @@ import numpy as np
 from tetris.movement import TetrominoController, TetrominoDropper
 
 from . import __version__
-from tetris.blocks import Tetromino, TetrominoI, TetrominoO
+from tetris.blocks import Tetromino, TetrominoI, TetrominoO, get_tetromino
 from tetris.well import Well
 
 from asciimatics.exceptions import ResizeScreenError
@@ -112,7 +112,10 @@ def play(screen: Screen = None):
         ## MAIN LOOP
 
         # 1. generate new tetromino
-        t = TetrominoO(well)
+        t = get_tetromino(
+            np.random.choice(['I', 'O', 'L', 'J', 'S', 'Z', 'T']),
+            well
+        )
 
         if drop_tetromino(t, well, screen) == 1:
             return 1

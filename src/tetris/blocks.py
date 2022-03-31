@@ -93,3 +93,8 @@ class TetrominoT(Tetromino):
         self.matrix[0,0] = 0
         self.matrix[0,2] = 0
         self.matrix[2,:] = 0
+
+def get_tetromino(name: str, *args, **kwargs):
+    name = name.upper()
+
+    return eval(f"Tetromino{name}")(*args, **kwargs)
