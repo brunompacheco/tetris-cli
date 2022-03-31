@@ -4,7 +4,7 @@ import pytest
 from threading import Event
 from tetris.blocks import TetrominoI
 
-from tetris.movement import TetrominoDropper, TetrominoController
+from tetris.movement import TetrominoDropper
 from tetris.well import Well
 
 
@@ -16,32 +16,49 @@ def basic_well():
 def tetromino(basic_well):
     return TetrominoI(basic_well)
 
-def test_drop_cancel(basic_well, tetromino):
-    interval = 0.05
-    
-    dropper = TetrominoDropper(interval, Event())
+@pytest.fixture
+def dropper():
+    return TetrominoDropper(0.05, Event(), Event())
 
+def test_drop_cancel(basic_well, tetromino, dropper):
     dropper.start(tetromino, basic_well)
 
-    sleep(5 * interval + 0.01)
+    sleep(6 * dropper.interval)
 
     dropper.cancel()
 
     assert tetromino.y == 5
 
-    sleep(5 * interval)
+    sleep(5 * dropper.interval)
 
     assert tetromino.y == 5
 
-def test_update_flag(basic_well, tetromino):
+def test_drop_flag(basic_well):
+    t = TetrominoI(basic_well)
+
     interval = 0.05
     flag = Event()
     flag.clear()
-    
-    dropper = TetrominoDropper(interval, flag)
 
-    dropper.start(tetromino, basic_well)
+    dropper = TetrominoDropper(interval, Event(), flag)
 
-    sleep(interval + 0.01)
+    dropper.start(t, basic_well)
+
+    sleep(dropper.interval * (basic_well.nrows + 2))
+
+    assert flag.is_set()
+
+def test_update_flag(basic_well):
+    t = TetrominoI(basic_well)
+
+    interval = 0.05
+    flag = Event()
+    flag.clear()
+
+    dropper = TetrominoDropper(interval, flag, Event())
+
+    dropper.start(t, basic_well)
+
+    sleep(dropper.interval + 0.01)
 
     assert flag.is_set()

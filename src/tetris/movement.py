@@ -40,17 +40,19 @@ class RecurringTimer(ABC):
         pass
 
 class TetrominoDropper(RecurringTimer):
-    def __init__(self, interval: float, update_flag: Event) -> None:
+    def __init__(self, interval: float, update_flag: Event, dropped_flag: Event
+        ) -> None:
         super().__init__(interval)
 
         self.update_flag = update_flag
+        self.dropped_flag = dropped_flag
 
     def run(self, tetromino: Tetromino, well: Well):
         tetromino.y += 1
 
         if well.check_overlap(tetromino) or well.check_oob(tetromino):
             tetromino.y -= 1
-            # TODO: raise event on collision
+            self.dropped_flag.set()
         else:
             self.update_flag.set()
 

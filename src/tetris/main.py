@@ -91,7 +91,7 @@ def play(screen: Screen = None):
     # 2. drop tetromino until it touches the others
     # well.matrix[5,5] = 1
 
-    dropper = TetrominoDropper(0.25, update_flag)
+    dropper = TetrominoDropper(0.25, update_flag, t_dropped)
     controller = TetrominoController(0.01, update_flag)
 
     well_drawer.start(screen, well, t)
@@ -99,11 +99,13 @@ def play(screen: Screen = None):
     controller.start(screen, t, well)
     dropper.start(t, well)
 
-    while True:
+    while not t_dropped.is_set():
         try:
             pass
         except KeyboardInterrupt:
             return
+
+    return
 
     # 3. add tetromino to well
 
