@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from threading import Thread, Event
 
 import numpy as np
@@ -20,24 +21,39 @@ def draw_well(matrix: np.ndarray, bg_square: str = "  ", visible=20) -> str:
 
     return board
 
-class WellDrawer():
+class Drawer(ABC):
     """Update on-demand.
     """
     def __init__(self, flag: Event) -> None:
         self.thread = None
         self.flag = flag
 
-        self._past_well_str = None
-
     def start(self, *args, **kwargs):
-        self.thread = Thread(target=self.run, args=args, kwargs=kwargs)
+        self.thread = Thread(target=self._run, args=args, kwargs=kwargs)
         self.thread.daemon = True
         self.thread.start()
 
-    def run(self, screen: Screen, well: Well, tetromino: Tetromino):
+    def _run(self, *args, **kwargs):
         self.flag.wait()
         self.flag.clear()
 
+        self.run(*args, **kwargs)
+
+        self.thread = Thread(target=self._run, args=args, kwargs=kwargs)
+        self.thread.daemon = True
+        self.thread.start()
+
+    @abstractmethod
+    def run(self):
+        pass
+
+class WellDrawer(Drawer):
+    def __init__(self, flag: Event) -> None:
+        super().__init__(flag)
+
+        self._past_well_str = None
+
+    def run(self, screen: Screen, well: Well, tetromino: Tetromino):
         # TODO: draw only changes, avoid flickering
 
         x = (screen.width // 2) - (well.ncols // 2)
@@ -58,6 +74,3 @@ class WellDrawer():
 
         screen.refresh()
 
-        self.thread = Thread(target=self.run, args=(screen, well, tetromino))
-        self.thread.daemon = True
-        self.thread.start()
