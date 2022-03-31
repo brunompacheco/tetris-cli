@@ -20,7 +20,7 @@ class Tetromino(ABC):
 class TetrominoI(Tetromino):
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 2
-        y = -1
+        y = 1
 
         super().__init__(well, x, y)
 
@@ -30,7 +30,7 @@ class TetrominoI(Tetromino):
 class TetrominoJ(Tetromino):
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
-        y = -1
+        y = 0
 
         super().__init__(well, x, y)
 
@@ -41,7 +41,7 @@ class TetrominoJ(Tetromino):
 class TetrominoL(Tetromino):
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
-        y = -1
+        y = 0
 
         super().__init__(well, x, y)
 
@@ -52,7 +52,7 @@ class TetrominoL(Tetromino):
 class TetrominoO(Tetromino):
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
-        y = -1
+        y = 0
 
         super().__init__(well, x, y)
 
@@ -61,7 +61,7 @@ class TetrominoO(Tetromino):
 class TetrominoS(Tetromino):
     def __init__(self, well: Well) -> None:
         x = (well.ncols // 2) - 1
-        y = -1
+        y = 0
 
         super().__init__(well, x, y)
 

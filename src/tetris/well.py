@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Well():
-    def __init__(self, nrows=20, ncols=10) -> None:
+    def __init__(self, nrows=23, ncols=10) -> None:
         self.nrows = nrows
         self.ncols = ncols
 
@@ -82,3 +82,13 @@ class Well():
         self.matrix = new_matrix
 
         return sum(lines_cleared)
+    
+    def is_game_over(self, visible=20):
+        ys, _ = np.nonzero(self.matrix)
+        
+        if len(ys) == 0:
+            return False
+        else:
+            y_min = min(ys)
+
+            return y_min < self.nrows - visible

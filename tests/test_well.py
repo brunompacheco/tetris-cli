@@ -91,3 +91,14 @@ def test_clear_lines():
     ])
     assert well.clear_lines() == 2
     assert (well.matrix == expected).all()
+
+def test_game_over():
+    well = Well(3,3)
+
+    assert not well.is_game_over(visible=2)
+
+    well.matrix[1,1] = 1
+    assert not well.is_game_over(visible=2)
+
+    well.matrix[0,2] = 1
+    assert well.is_game_over(visible=2)

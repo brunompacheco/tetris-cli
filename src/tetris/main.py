@@ -14,9 +14,10 @@ from asciimatics.exceptions import ResizeScreenError
 from asciimatics.screen import ManagedScreen, Screen
 
 
-def draw_well(matrix: np.ndarray, bg_square: str = "  ") -> str:
+def draw_well(matrix: np.ndarray, bg_square: str = "  ", visible=20) -> str:
     solid_block = chr(0x2588)
     matrix = np.where(matrix == 0, bg_square, 2 * solid_block)
+    matrix = matrix[-visible:]  # display only visible rows
 
     lines = [2*solid_block + ''.join(line) + 2*solid_block for line in matrix]
     lines.insert(0, solid_block * len(lines[0]))
@@ -125,6 +126,8 @@ def play(screen: Screen = None):
         screen.print_at(lines_cleared, 0, 0)
 
         # 5. check for game overs
+        if well.is_game_over():
+            return 0
 
     return 0
 
